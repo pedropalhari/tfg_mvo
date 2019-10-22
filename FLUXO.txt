@@ -8,6 +8,8 @@
   |-> O jeito que o opencv-java funciona é que você passa os objetos, e a maioria das funções retorna void
 |-> OpenCV convertido para gradle
   |-> https://github.com/quickbirdstudios/opencv-android (graças a deus, usando 3.4.1 para não dar pau)
+|-> Artigo base com o código da aplicação
+  |-> https://heartbeat.fritz.ai/a-guide-to-preparing-opencv-for-android-4e9532677809
 
 * Desenvolvimento Parte 1
 |-> Instalar as libs
@@ -20,3 +22,20 @@
 |-> Criado classe helper Colors que pega cores aleatórias pra ficar bonitinho
 |-> Converter a matriz de resultado para um bitmap
 |-> Botar na tela
+
+* Parte 2 (Pegando da câmera e analizando pelo FAST uma imagem)
+|-> Pegar da câmera adaptado desse cara 
+  |-> https://stackoverflow.com/questions/6448856/android-camera-intent-how-to-get-full-sized-photo
+|-> Habilitar External Storage
+  |-> https://pt.stackoverflow.com/questions/187119/erro-fileuriexposedexception-no-android-n
+|-> Arrumar os filepaths
+  |-> https://stackoverflow.com/questions/40498380/java-lang-illegalargumentexception-failed-to-find-configured-root-that-contains
+
+* Desenvolvimento
+|-> Pegar o build.gradle e subir a minima versão do SDK para suportar as coisas da camera (15 -> 23)
+|-> Adicionar métodos helpers de acionar a câmera e retornar
+|-> A câmera comumente retorna um thumbnail, tem que configurar de pegar a imagem inteira, pra isso se usa External_Storage
+|-> Fazer as modificações necessárias para pedir o external storage
+|-> Refazer um pouco do layout
+|-> A câmera coloca a imagem no imageView, depois eu pego a imagem do imageView, converto em Mat, processo e retorno
+
