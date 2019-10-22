@@ -1,0 +1,22 @@
+*** Fluxo de desenvolvimento do tfg ***
+
+* Parte 1 (Fazendo o FAST funcionar no celular)
+|-> Documentação JAVA para converter o projeto 
+  |-> https://docs.opencv.org/master/javadoc/index.html
+|-> Documentação do FAST em Python, para converter para Java
+  |-> https://docs.opencv.org/3.4/df/d0c/tutorial_py_fast.html
+  |-> O jeito que o opencv-java funciona é que você passa os objetos, e a maioria das funções retorna void
+|-> OpenCV convertido para gradle
+  |-> https://github.com/quickbirdstudios/opencv-android (graças a deus, usando 3.4.1 para não dar pau)
+
+Desenvolvimento
+|-> Instalar as libs
+|-> Montar uma interface de teste
+|-> Pegar uma imagem .jpeg de carro de corrida
+|-> Converter ela para grayscale
+|-> Usar o FAST para detectar seus cantos
+|-> Converter de grayscale para RGB de novo para mostrar os quadradinhos em cor
+|-> Fazer uma função que desenha os circulos em cima da Mat (matriz de resultado), mandar os pontos detectados pelo FAST
+|-> Criado classe helper Colors que pega cores aleatórias pra ficar bonitinho
+|-> Converter a matriz de resultado para um bitmap
+|-> Botar na tela

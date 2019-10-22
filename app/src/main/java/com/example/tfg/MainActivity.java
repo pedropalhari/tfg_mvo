@@ -24,6 +24,20 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
 
+class COLORS {
+    static Scalar BLUE = new Scalar(0,120,255,0);
+    static Scalar PURPLE = new Scalar(189,0,255,0);
+    static Scalar ORANGE = new Scalar(255,154,0,0);
+    static Scalar GREEN = new Scalar(1,255,31,0);
+    static Scalar YELLOW = new Scalar(227,255,0,0);
+
+    static Scalar getRandomColor(){
+        Scalar[] Colors = {BLUE, PURPLE, ORANGE, GREEN, YELLOW};
+
+        return Colors[(int) (Math.random() * Colors.length)];
+    }
+}
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -45,15 +59,18 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2GRAY);
+
         MatOfKeyPoint kp = new MatOfKeyPoint();
 
         fast.detect(img, kp);
 
+        Imgproc.cvtColor(img, img, Imgproc.COLOR_GRAY2RGB);
+
 
         for(KeyPoint k: kp.toArray()){
-
             Log.d("OPA", k.toString());
-            Imgproc.rectangle(img, new Point(k.pt.x, k.pt.y), new Point(k.pt.x, k.pt.y), new Scalar(0, 255, 0 ,255), 5);
+            drawKeyPoint(img, k.pt.x, k.pt.y);
         }
 
         //Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2BGRA);
@@ -71,5 +88,9 @@ public class MainActivity extends AppCompatActivity {
         Utils.matToBitmap(img, img_bitmap);
         ImageView imageView = findViewById(R.id.img);
         imageView.setImageBitmap(img_bitmap);
+    }
+
+    void drawKeyPoint(Mat img, double x, double y){
+        Imgproc.circle(img, new Point(x, y), 5, COLORS.getRandomColor(), 5);
     }
 }
