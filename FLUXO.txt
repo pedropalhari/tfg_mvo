@@ -9,7 +9,7 @@
 |-> OpenCV convertido para gradle
   |-> https://github.com/quickbirdstudios/opencv-android (graças a deus, usando 3.4.1 para não dar pau)
 
-Desenvolvimento
+* Desenvolvimento Parte 1
 |-> Instalar as libs
 |-> Montar uma interface de teste
 |-> Pegar uma imagem .jpeg de carro de corrida
