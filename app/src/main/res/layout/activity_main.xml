@@ -3,27 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/img"
-        android:layout_width="match_parent"
-        android:layout_height="398dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerInside"
-        android:src="@drawable/test" />
 
     <Button
-        android:id="@+id/photo"
+        android:id="@+id/toggleFast"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tirar a foto" />
+        android:text="TOGGLE FAST" />
 
-    <Button
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/camera_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="analyzePhotos"
-        android:text="Fazer o FAST" />
+        android:layout_height="match_parent"
+        opencv:show_fps="true"/>
 
 </LinearLayout>

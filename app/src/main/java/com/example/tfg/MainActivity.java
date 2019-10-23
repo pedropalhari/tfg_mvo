@@ -19,13 +19,19 @@ import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
@@ -41,152 +47,129 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-class COLORS {
-    static Scalar BLUE = new Scalar(0, 120, 255, 0);
-    static Scalar PURPLE = new Scalar(189, 0, 255, 0);
-    static Scalar ORANGE = new Scalar(255, 154, 0, 0);
-    static Scalar GREEN = new Scalar(1, 255, 31, 0);
-    static Scalar YELLOW = new Scalar(227, 255, 0, 0);
-
-    static Scalar getRandomColor() {
-        Scalar[] Colors = {BLUE, PURPLE, ORANGE, GREEN, YELLOW};
-
-        return Colors[(int) (Math.random() * Colors.length)];
-    }
-}
-
-public class MainActivity extends AppCompatActivity {
-
-    private static final int CAMERA_REQUEST = 1888;
+public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+    CameraBridgeViewBase cameraBridgeViewBase;
+    Mat mat1;
+    BaseLoaderCallback baseLoaderCallback;
     private ImageView imageView;
-    private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
-    private Uri capturedImageUri;
+    boolean isFastActive = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        OpenCVLoader.initDebug();
 
-        this.imageView = (ImageView) this.findViewById(R.id.img);
-        Button photoButton = (Button) this.findViewById(R.id.photo);
-        photoButton.setOnClickListener(new View.OnClickListener() {
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, 100);
+
+        cameraBridgeViewBase = (JavaCameraView) findViewById(R.id.camera_view);
+        cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
+        cameraBridgeViewBase.setCvCameraViewListener(this);
+
+        Button toggleFast = (Button) this.findViewById(R.id.toggleFast);
+        toggleFast.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 30);
-                } else if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    //requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 30);
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
-                } else {
-                    openBackCamera();
-                }
+                isFastActive = !isFastActive;
             }
         });
-    }
 
-    private String pictureImagePath = "";
+        baseLoaderCallback = new BaseLoaderCallback(this) {
+            @Override
+            public void onManagerConnected(int status) {
 
-    private void openBackCamera() {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = timeStamp + ".jpg";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
-        File file = new File(pictureImagePath);
-        Uri outputFileUri = FileProvider.getUriForFile(
-                MainActivity.this,
-                "com.example.tfg.fileprovider",
-                file);
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-        startActivityForResult(cameraIntent, 1);
+                switch (status) {
+                    case BaseLoaderCallback.SUCCESS:
+                        cameraBridgeViewBase.enableView();
+                        break;
+                    default:
+                        super.onManagerConnected(status);
+                        break;
+
+                }
+            }
+        };
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void onCameraViewStarted(int width, int height) {
+        mat1=new Mat(width,height, CvType.CV_8UC4);
 
-        Log.d("OPA", requestCode + " REQUEST CODE");
-
-        if (requestCode == 30) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-                //Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                //startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            } else {
-                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-            }
-        }
-
-        if (requestCode == MY_CAMERA_PERMISSION_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            } else {
-                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-            }
-        }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("OPA", resultCode + "");
-        if (requestCode == 1) {
-            File imgFile = new File(pictureImagePath);
-            if (imgFile.exists()) {
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                ImageView myImage = (ImageView) findViewById(R.id.img);
-                myImage.setImageBitmap(myBitmap);
-
-            }
-        }
+    public void onCameraViewStopped() {
+        mat1.release();
 
     }
 
-    public void analyzePhotos(View v) {
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        mat1=inputFrame.rgba();
 
         FastFeatureDetector fast = FastFeatureDetector.create();
 
-        Mat img = new Mat();
+        //This to rotate the Frame to 90 degree
+        Mat mRgbaT = mat1.t();
+        Core.flip(mat1.t(), mRgbaT, 1);
+        Imgproc.resize(mRgbaT, mRgbaT, mat1.size());
 
-        //img = Utils.loadResource(getApplicationContext(), R.drawable.test);
-        Utils.bitmapToMat(((BitmapDrawable) imageView.getDrawable()).getBitmap(), img);
+        if(isFastActive) {
 
-        Log.d("OPA", "ALO" + img.toString());
+            Log.d("OPA", "ALO" + mRgbaT.toString());
 
-        Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2GRAY);
+            Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGB2GRAY);
 
-        MatOfKeyPoint kp = new MatOfKeyPoint();
+            MatOfKeyPoint kp = new MatOfKeyPoint();
 
-        fast.detect(img, kp);
+            fast.detect(mRgbaT, kp);
 
-        Imgproc.cvtColor(img, img, Imgproc.COLOR_GRAY2RGB);
+            Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_GRAY2RGB);
 
 
-        for (KeyPoint k : kp.toArray()) {
-            Log.d("OPA", k.toString());
-            drawKeyPoint(img, k.pt.x, k.pt.y);
+            for (KeyPoint k : kp.toArray()) {
+                Log.d("OPA", k.toString());
+                drawKeyPoint(mRgbaT, k.pt.x, k.pt.y);
+            }
         }
 
-        //Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2BGRA);
+        return mRgbaT;
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(cameraBridgeViewBase!=null)
+        {
+            cameraBridgeViewBase.disableView();
+        }
 
-        //Mat img_result = img.clone();
-        //Imgproc.Canny(img, img_result, 80, 90);
-        //Bitmap img_bitmap = Bitmap.createBitmap(img_result.cols(), img_result.rows(),Bitmap.Config.ARGB_8888);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!OpenCVLoader.initDebug())
+        {
+            Toast.makeText(getApplicationContext(),"There is problem in OpenCV",Toast.LENGTH_SHORT).show();
+        }
+        else {
+            baseLoaderCallback.onManagerConnected(BaseLoaderCallback.SUCCESS);
+        }
+    }
 
-        Bitmap img_bitmap = Bitmap.createBitmap(img.cols(), img.rows(), Bitmap.Config.RGB_565);
-
-        Utils.matToBitmap(img, img_bitmap);
-        ImageView imageView = findViewById(R.id.img);
-        imageView.setImageBitmap(img_bitmap);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!OpenCVLoader.initDebug())
+        {
+            Toast.makeText(getApplicationContext(),"There is problem in OpenCV",Toast.LENGTH_SHORT).show();
+        }
     }
 
     void drawKeyPoint(Mat img, double x, double y) {
-        Imgproc.circle(img, new Point(x, y), 5, COLORS.getRandomColor(), 5);
+        Imgproc.circle(img, new Point(x, y), 5, Colors.getRandomColor(), 5);
     }
 }
+

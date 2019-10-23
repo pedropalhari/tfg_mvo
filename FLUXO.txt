@@ -39,3 +39,19 @@
 |-> Refazer um pouco do layout
 |-> A câmera coloca a imagem no imageView, depois eu pego a imagem do imageView, converto em Mat, processo e retorno
 
+* Parte 3
+
+* Desenvolvimento
+|-> Implementação do FFMPEG para acesso a stream da câmera de video
+|-> Interface entre o FFMPEG e o Java muito lenta
+
+* Parte 4
+|-> Módulo que cria um câmera view e me dá acesso aos frames
+  |-> https://physicistdeveloper.wordpress.com/2018/04/08/use-opencv-camera-activity-in-android/
+
+* Desenvolvimento
+|-> O Frame que vem do OpenCV já é um Mat, só rotaciono ele e aplico o FAST automaticamente a cada frame.
+|-> Modificado layout para novo modo de teste, para ligar e desligar o Fast
+|-> Performance fast ligado e desligado em algumas áreas varia de 30fps para 15fps
+  |-> Provavelmente pode ocorrer porque cada ponto é desenhado em cima do frame, custoso, e o frame segura a renderização do próximo
+  |-> Talvez colocar esse fluxo multithread
